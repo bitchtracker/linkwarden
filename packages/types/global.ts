@@ -5,6 +5,7 @@ import {
   User,
   DashboardSection,
   Subscription,
+  LinkCheckStatus,
 } from "@linkwarden/prisma/client";
 import Stripe from "stripe";
 
@@ -20,11 +21,21 @@ export interface LinkIncludingShortenedCollectionAndTags
     | "updatedAt"
     | "lastPreserved"
     | "importDate"
+    | "checkStatus"
+    | "checkStatusCode"
+    | "checkError"
+    | "checkFailCount"
+    | "lastCheckedAt"
   > {
   id?: number;
   createdAt?: string;
   importDate?: string;
   lastPreserved?: string | Date | null;
+  checkStatus?: LinkCheckStatus | null;
+  checkStatusCode?: number | null;
+  checkError?: string | null;
+  checkFailCount?: number;
+  lastCheckedAt?: string | Date | null;
   collectionId?: number;
   tags: Tag[];
   pinnedBy?: {

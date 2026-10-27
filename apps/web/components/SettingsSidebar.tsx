@@ -35,6 +35,11 @@ export default function SettingsSidebar({
       icon: "bi-rss",
     },
     {
+      title: t("link_checker"),
+      href: "/settings/link-checker",
+      icon: "bi-heart-pulse",
+    },
+    {
       title: t("access_tokens"),
       href: "/settings/access-tokens",
       icon: "bi-key",

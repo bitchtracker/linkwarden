@@ -25,6 +25,8 @@ export const getEnvData = () => {
     MAX_FILE_BUFFER: Number(process.env.NEXT_PUBLIC_MAX_FILE_BUFFER) || null,
     USER_CONTENT_DOMAIN: process.env.NEXT_PUBLIC_USER_CONTENT_DOMAIN || null,
     AI_ENABLED: hasAiProvider || null,
+    LINK_CHECKER_ENABLED:
+      process.env.NEXT_PUBLIC_DISABLE_LINK_CHECKER !== "true" || null,
     INSTANCE_VERSION: process.env.version,
     STRIPE_ENABLED:
       process.env.NEXT_PUBLIC_STRIPE === "true" ||

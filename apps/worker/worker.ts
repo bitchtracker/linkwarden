@@ -1,5 +1,6 @@
 import { autoTagPreservedLinks } from "./workers/autoTagPreservedLinks";
 import { startIndexing } from "./workers/linkIndexing";
+import { startLinkChecker } from "./workers/linkChecker";
 import { linkProcessing } from "./workers/linkProcessing";
 import { migrationWorker } from "./workers/migrationWorker";
 import { startRSSPolling } from "./workers/rssPolling";
@@ -16,6 +17,7 @@ async function init() {
   linkProcessing(workerIntervalInSeconds);
   autoTagPreservedLinks(workerIntervalInSeconds);
   startIndexing(workerIntervalInSeconds);
+  startLinkChecker();
   // trialEndEmailWorker();
 }
 

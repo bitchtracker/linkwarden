@@ -17,6 +17,7 @@ import { useUser } from "@linkwarden/router/user";
 import { useUpdateLink, useUpdateFile } from "@linkwarden/router/links";
 import LinkIcon from "./LinkViews/LinkComponents/LinkIcon";
 import CopyButton from "./CopyButton";
+import LinkCheckStatusRow from "./LinkCheckStatusRow";
 import { useRouter } from "next/router";
 import Icon from "./Icon";
 import { IconWeight } from "@phosphor-icons/react";
@@ -319,6 +320,10 @@ export default function LinkDetails({
                   </div>
                 </div>
               </div>
+
+              {link.checkStatus && link.lastCheckedAt && (
+                <LinkCheckStatusRow link={link} />
+              )}
             </>
           ) : activeLink.url ? (
             <>

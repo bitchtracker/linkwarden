@@ -9,6 +9,7 @@ export type Config = {
   MAX_FILE_BUFFER: number | null;
   USER_CONTENT_DOMAIN: string | null;
   AI_ENABLED: boolean | null;
+  LINK_CHECKER_ENABLED: boolean | null;
   INSTANCE_VERSION: string | null;
   STRIPE_ENABLED: boolean | null;
   STRIPE_BILLING_PORTAL_URL: string | null;

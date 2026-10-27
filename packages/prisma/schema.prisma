@@ -60,6 +60,8 @@ model User {
   readableLineHeight      String?               @default("1.8")
   readableLineWidth       String?               @default("normal")
   preventDuplicateLinks   Boolean               @default(false)
+  linkCheckerEnabled      Boolean               @default(true)
+  linkCheckIntervalDays   Int                   @default(7)
   archiveAsScreenshot     Boolean               @default(true)
   archiveAsMonolith       Boolean               @default(true)
   archiveAsPDF            Boolean               @default(true)
@@ -182,10 +184,23 @@ model Link {
   indexVersion    Int?
   lastPreserved   DateTime?
   importDate      DateTime?
+  checkStatus     LinkCheckStatus?
+  checkStatusCode Int?
+  checkError      String?
+  checkFailCount  Int         @default(0)
+  lastCheckedAt   DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @default(now()) @updatedAt
 
   @@index([collectionId])
+  @@index([lastCheckedAt])
+}
+
+enum LinkCheckStatus {
+  OK
+  BROKEN
+  RESTRICTED
+  UNREACHABLE
 }
 
 model Tag {

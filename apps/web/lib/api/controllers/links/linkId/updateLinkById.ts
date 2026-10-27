@@ -160,6 +160,15 @@ export default async function updateLinkById(
         monolith: oldLink?.url !== data.url ? null : undefined,
         preview: oldLink?.url !== data.url ? null : undefined,
         lastPreserved: oldLink?.url !== data.url ? null : undefined,
+        ...(oldLink?.url !== data.url
+          ? {
+              checkStatus: null,
+              checkStatusCode: null,
+              checkError: null,
+              checkFailCount: 0,
+              lastCheckedAt: null,
+            }
+          : {}),
         indexVersion: null,
         collection: {
           connect: {

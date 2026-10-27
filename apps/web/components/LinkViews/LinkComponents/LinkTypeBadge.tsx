@@ -1,6 +1,7 @@
 import { LinkIncludingShortenedCollectionAndTags } from "@linkwarden/types/global";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import LinkCheckStatusIcon from "./LinkCheckStatusIcon";
 
 function LinkTypeBadge({
   link,
@@ -31,18 +32,21 @@ function LinkTypeBadge({
   };
 
   return link.url && url ? (
-    <Link
-      href={link.url || ""}
-      target="_blank"
-      title={link.url || ""}
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
-      className="flex gap-1 item-center select-none text-neutral hover:opacity-70 duration-100 max-w-full w-fit"
-    >
-      <i className="bi-link-45deg text-lg leading-none"></i>
-      <p className="text-xs truncate">{url}</p>
-    </Link>
+    <div className="flex gap-1 items-center max-w-full w-fit">
+      <Link
+        href={link.url || ""}
+        target="_blank"
+        title={link.url || ""}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        className="flex gap-1 item-center select-none text-neutral hover:opacity-70 duration-100 max-w-full w-fit min-w-0"
+      >
+        <i className="bi-link-45deg text-lg leading-none"></i>
+        <p className="text-xs truncate">{url}</p>
+      </Link>
+      <LinkCheckStatusIcon link={link} />
+    </div>
   ) : (
     <div className="flex gap-1 item-center select-none text-neutral duration-100 max-w-full w-fit">
       <i className={typeIcon() + ` text-md leading-none`}></i>

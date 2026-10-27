@@ -100,6 +100,8 @@ export const UpdateUserPreferenceSchema = z.object({
   readableLineHeight: z.string().trim().max(100).optional(),
   readableLineWidth: z.string().trim().max(100).optional(),
   dismissedAnnouncementId: z.string().trim().max(100).optional(),
+  linkCheckerEnabled: z.boolean().optional(),
+  linkCheckIntervalDays: z.number().int().min(1).max(365).optional(),
   // archiveAsScreenshot: z.boolean().optional(),
   // archiveAsMonolith: z.boolean().optional(),
   // archiveAsPDF: z.boolean().optional(),

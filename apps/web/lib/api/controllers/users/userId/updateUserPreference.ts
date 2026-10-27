@@ -32,6 +32,8 @@ export default async function updateUserPreference(
       readableLineHeight: data.readableLineHeight,
       readableLineWidth: data.readableLineWidth,
       dismissedAnnouncementId: data.dismissedAnnouncementId,
+      linkCheckerEnabled: data.linkCheckerEnabled,
+      linkCheckIntervalDays: data.linkCheckIntervalDays,
     },
     include: {
       subscriptions: true,
