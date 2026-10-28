@@ -57,6 +57,22 @@ beforeAll(async () => {
       case "/redirect-loop":
         res.writeHead(302, { Location: "/redirect-loop" }).end();
         return;
+      case "/challenge-503":
+        // Modelled on a real proof-of-work bot challenge (GroundShade).
+        res
+          .writeHead(503, {
+            "Retry-After": "120",
+            "WWW-Authenticate": 'GroundShade realm="example", scheme="x"',
+            "X-GroundShade-Challenge": "1",
+          })
+          .end();
+        return;
+      case "/cloudflare-challenge":
+        res.writeHead(503, { "cf-mitigated": "challenge" }).end();
+        return;
+      case "/unavailable":
+        res.writeHead(503, { "Retry-After": "120" }).end();
+        return;
       case "/hang":
         return;
       case "/endless-body":
@@ -134,6 +150,23 @@ describe("checkLink", () => {
     await expect(checkLink(`${base}/server-error`)).resolves.toMatchObject({
       status: "BROKEN",
       statusCode: 500,
+    });
+  });
+
+  it("marks bot challenges as RESTRICTED even with a 5xx status", async () => {
+    await expect(checkLink(`${base}/challenge-503`)).resolves.toMatchObject({
+      status: "RESTRICTED",
+      statusCode: 503,
+    });
+    await expect(
+      checkLink(`${base}/cloudflare-challenge`)
+    ).resolves.toMatchObject({ status: "RESTRICTED", statusCode: 503 });
+  });
+
+  it("still marks a plain 503 as BROKEN", async () => {
+    await expect(checkLink(`${base}/unavailable`)).resolves.toMatchObject({
+      status: "BROKEN",
+      statusCode: 503,
     });
   });
 

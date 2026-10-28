@@ -17,9 +17,37 @@ const RESTRICTED_STATUS_CODES = new Set([401, 403, 407, 429, 451, 999]);
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
-export function classifyStatusCode(statusCode: number): LinkCheckStatus {
+type HeaderLookup = {
+  get(name: string): string | null;
+  keys(): Iterable<string>;
+};
+
+// Bot protection often answers automated requests with a challenge page and
+// an error status (commonly 403 or 503) while real browsers get the page, so
+// an error response that carries a challenge marker is the site's restriction,
+// not a dead link.
+export function isBotChallenge(headers?: HeaderLookup | null): boolean {
+  if (!headers) return false;
+
+  if (headers.get("cf-mitigated")?.toLowerCase() === "challenge") return true;
+  if (headers.get("www-authenticate")) return true;
+  if (/challenge|captcha/i.test(headers.get("x-amzn-waf-action") || ""))
+    return true;
+  if (/ddos-guard/i.test(headers.get("server") || "")) return true;
+
+  for (const name of headers.keys()) {
+    if (/challenge|captcha/i.test(name)) return true;
+  }
+
+  return false;
+}
+
+export function classifyStatusCode(
+  statusCode: number,
+  headers?: HeaderLookup | null
+): LinkCheckStatus {
   if (statusCode >= 200 && statusCode < 400) return LinkCheckStatus.OK;
-  if (RESTRICTED_STATUS_CODES.has(statusCode))
+  if (RESTRICTED_STATUS_CODES.has(statusCode) || isBotChallenge(headers))
     return LinkCheckStatus.RESTRICTED;
   return LinkCheckStatus.BROKEN;
 }
@@ -76,7 +104,7 @@ async function request(url: string, method: "HEAD" | "GET", timeoutMs: number) {
       (response.body as any)?.destroy?.();
     } catch {}
 
-    return response.status;
+    return { status: response.status, headers: response.headers };
   } finally {
     clearTimeout(timeout);
   }
@@ -86,25 +114,24 @@ export async function checkLink(
   url: string,
   { timeoutMs = 20_000 }: { timeoutMs?: number } = {}
 ): Promise<LinkCheckResult> {
-  let statusCode: number | null = null;
-
   try {
     // HEAD is cheap, but plenty of servers answer it incorrectly (405, 404,
     // 403...), so any non-success answer is confirmed with a GET.
+    let response: Awaited<ReturnType<typeof request>> | null = null;
+
     try {
-      statusCode = await request(url, "HEAD", timeoutMs);
+      response = await request(url, "HEAD", timeoutMs);
     } catch (error) {
       if (error instanceof UnsafeUrlError) throw error;
-      statusCode = null;
     }
 
-    if (statusCode === null || statusCode >= 400) {
-      statusCode = await request(url, "GET", timeoutMs);
+    if (response === null || response.status >= 400) {
+      response = await request(url, "GET", timeoutMs);
     }
 
     return {
-      status: classifyStatusCode(statusCode),
-      statusCode,
+      status: classifyStatusCode(response.status, response.headers),
+      statusCode: response.status,
       error: null,
     };
   } catch (error: any) {

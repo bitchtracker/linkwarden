@@ -23,6 +23,7 @@ import {
 import { DashboardLinks } from "@/components/DashboardLinks";
 import { ViewMode } from "@linkwarden/types/global";
 import ViewDropdown from "@/components/ViewDropdown";
+import BrokenLinksNotice from "@/components/BrokenLinksNotice";
 import clsx from "clsx";
 import Icon from "@/components/Icon";
 import Droppable from "@/components/Droppable";
@@ -149,6 +150,7 @@ const Page: NextPageWithLayout = () => {
             />
           </div>
         </div>
+        <BrokenLinksNotice />
         {orderedSections[0] ? (
           orderedSections?.map((section, i) => (
             <Section

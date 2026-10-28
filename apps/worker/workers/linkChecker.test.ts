@@ -9,17 +9,16 @@ import {
   it,
   vi,
 } from "vitest";
+import { prisma } from "@linkwarden/prisma";
+import { checkDueLinks, saveCheckResult } from "./linkChecker";
 
 // Runs against a real, disposable database (it creates and deletes users and
 // touches every link's lastCheckedAt), so it only runs when explicitly enabled:
-// LINK_CHECKER_DB_TEST=true yarn dotenv -- vitest run apps/worker
+// LINK_CHECKER_DB_TEST=true npx dotenv -- npx vitest run apps/worker
 const enabled =
   process.env.LINK_CHECKER_DB_TEST === "true" && !!process.env.DATABASE_URL;
 
-describe.skipIf(!enabled)("link checker worker", async () => {
-  const { prisma } = await import("@linkwarden/prisma");
-  const { checkDueLinks, saveCheckResult } = await import("./linkChecker");
-
+describe.skipIf(!enabled)("link checker worker", () => {
   const DAY = 86400000;
   const runId = Date.now();
   let server: http.Server;

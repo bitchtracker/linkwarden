@@ -588,5 +588,8 @@
   "problem_links": "Links With Problems",
   "link_status": "Link Status",
   "checked_on": "Checked {{date}}",
-  "failed_checks_in_a_row": "Failed {{count}} checks in a row."
+  "failed_checks_in_a_row": "Failed {{count}} checks in a row.",
+  "broken_links_notice_singular": "1 of your links is broken or unreachable.",
+  "broken_links_notice_plural": "{{count}} of your links are broken or unreachable.",
+  "review_links": "Review them"
 }
