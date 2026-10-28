@@ -1,6 +1,7 @@
 import { LinkIncludingShortenedCollectionAndTags } from "@linkwarden/types/global";
 import { useTranslation } from "next-i18next";
 import React from "react";
+import { linkCheckDetail } from "@/components/LinkCheckStatusRow";
 import {
   Tooltip,
   TooltipContent,
@@ -24,10 +25,7 @@ function LinkCheckStatusIcon({
       ? t("link_status_broken")
       : t("link_status_unreachable");
 
-  const detail =
-    link.checkStatus === "BROKEN" && link.checkStatusCode
-      ? `HTTP ${link.checkStatusCode}`
-      : link.checkError;
+  const detail = linkCheckDetail(t, link);
 
   return (
     <TooltipProvider>

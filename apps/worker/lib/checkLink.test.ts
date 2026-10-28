@@ -9,7 +9,7 @@ import {
   it,
   vi,
 } from "vitest";
-import { checkLink, classifyStatusCode } from "./checkLink";
+import { checkLink, classifyStatusCode, RESTRICTED_MESSAGE } from "./checkLink";
 
 let server: http.Server;
 let base = "";
@@ -113,7 +113,8 @@ describe("classifyStatusCode", () => {
     [404, "BROKEN"],
     [410, "BROKEN"],
     [500, "BROKEN"],
-    [503, "BROKEN"],
+    [502, "BROKEN"],
+    [503, "RESTRICTED"],
     [401, "RESTRICTED"],
     [403, "RESTRICTED"],
     [429, "RESTRICTED"],
@@ -163,10 +164,11 @@ describe("checkLink", () => {
     ).resolves.toMatchObject({ status: "RESTRICTED", statusCode: 503 });
   });
 
-  it("still marks a plain 503 as BROKEN", async () => {
-    await expect(checkLink(`${base}/unavailable`)).resolves.toMatchObject({
-      status: "BROKEN",
+  it("marks a plain 503 as RESTRICTED with an explanation", async () => {
+    await expect(checkLink(`${base}/unavailable`)).resolves.toEqual({
+      status: "RESTRICTED",
       statusCode: 503,
+      error: RESTRICTED_MESSAGE,
     });
   });
 

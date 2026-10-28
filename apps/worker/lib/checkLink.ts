@@ -12,7 +12,13 @@ export type LinkCheckResult = {
 
 // Status codes that usually mean the site is refusing automated requests
 // (login walls, bot protection, rate limits) rather than the page being gone.
-const RESTRICTED_STATUS_CODES = new Set([401, 403, 407, 429, 451, 999]);
+// 503 ("temporarily unavailable") is included because many sites send it to
+// automated clients while serving browsers normally, and even when it is
+// genuine it says nothing about the link being permanently dead.
+const RESTRICTED_STATUS_CODES = new Set([401, 403, 407, 429, 451, 503, 999]);
+
+export const RESTRICTED_MESSAGE =
+  "The site refused the automated check. The page may still work in a browser.";
 
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
@@ -129,10 +135,12 @@ export async function checkLink(
       response = await request(url, "GET", timeoutMs);
     }
 
+    const status = classifyStatusCode(response.status, response.headers);
+
     return {
-      status: classifyStatusCode(response.status, response.headers),
+      status,
       statusCode: response.status,
-      error: null,
+      error: status === LinkCheckStatus.RESTRICTED ? RESTRICTED_MESSAGE : null,
     };
   } catch (error: any) {
     if (error instanceof UnsafeUrlError) {

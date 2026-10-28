@@ -578,11 +578,11 @@
   "never": "Never",
   "link_status_ok": "Working",
   "link_status_broken": "Broken",
-  "link_status_restricted": "Restricted",
+  "link_status_restricted": "Couldn't verify",
   "link_status_unreachable": "Unreachable",
   "link_status_skipped": "Skipped",
   "link_status_broken_desc": "The site returned an error for this link.",
-  "link_status_restricted_desc": "The site blocks automated requests, so the link could not be verified.",
+  "link_status_restricted_desc": "The site refused the automated check, so it couldn't be verified. It may still work in a browser.",
   "link_status_unreachable_desc": "The site could not be reached.",
   "no_problem_links": "No broken links found.",
   "problem_links": "Links With Problems",
@@ -591,5 +591,12 @@
   "failed_checks_in_a_row": "Failed {{count}} checks in a row.",
   "broken_links_notice_singular": "1 of your links is broken or unreachable.",
   "broken_links_notice_plural": "{{count}} of your links are broken or unreachable.",
-  "review_links": "Review them"
+  "review_links": "Review them",
+  "unverified_links": "Couldn't Be Verified",
+  "unverified_links_desc": "These sites refused the automated check (for example with bot protection or a temporary 503). That doesn't mean the links are broken; open them to check.",
+  "http_reason_not_found": "Page not found",
+  "http_reason_gone": "Page was removed",
+  "http_reason_server_error": "Server error",
+  "http_reason_bad_gateway": "Bad gateway",
+  "http_reason_gateway_timeout": "Gateway timeout"
 }

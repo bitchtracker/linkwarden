@@ -1,6 +1,7 @@
 import { LinkIncludingShortenedCollectionAndTags } from "@linkwarden/types/global";
 import { useTranslation } from "next-i18next";
 import clsx from "clsx";
+import { TFunction } from "i18next";
 
 export const linkCheckStatusStyles = {
   OK: {
@@ -25,6 +26,40 @@ export const linkCheckStatusStyles = {
   },
 } as const;
 
+const STATUS_CODE_REASONS: Record<number, string> = {
+  404: "http_reason_not_found",
+  410: "http_reason_gone",
+  500: "http_reason_server_error",
+  502: "http_reason_bad_gateway",
+  504: "http_reason_gateway_timeout",
+};
+
+// A short, plain-language explanation of a check result.
+export function linkCheckDetail(
+  t: TFunction,
+  link: {
+    checkStatus?: keyof typeof linkCheckStatusStyles | null;
+    checkStatusCode?: number | null;
+    checkError?: string | null;
+  }
+): string | null {
+  const code = link.checkStatusCode ? ` (HTTP ${link.checkStatusCode})` : "";
+
+  switch (link.checkStatus) {
+    case "RESTRICTED":
+      return t("link_status_restricted_desc") + code;
+    case "BROKEN":
+    case "UNREACHABLE":
+      if (link.checkStatusCode) {
+        const reason = STATUS_CODE_REASONS[link.checkStatusCode];
+        return reason ? t(reason) + code : `HTTP ${link.checkStatusCode}`;
+      }
+      return link.checkError || null;
+    default:
+      return null;
+  }
+}
+
 export default function LinkCheckStatusRow({
   link,
 }: {
@@ -35,12 +70,7 @@ export default function LinkCheckStatusRow({
   if (!link.checkStatus || !link.lastCheckedAt) return null;
 
   const style = linkCheckStatusStyles[link.checkStatus];
-  const detail =
-    link.checkStatus === "OK"
-      ? null
-      : link.checkStatusCode
-        ? `HTTP ${link.checkStatusCode}`
-        : link.checkError;
+  const detail = linkCheckDetail(t, link);
 
   return (
     <div

@@ -8,10 +8,14 @@ import getServerSideProps from "@/lib/client/getServerSideProps";
 import Checkbox from "@/components/Checkbox";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { linkCheckStatusStyles } from "@/components/LinkCheckStatusRow";
+import {
+  linkCheckDetail,
+  linkCheckStatusStyles,
+} from "@/components/LinkCheckStatusRow";
 import { useUpdateUserPreference, useUser } from "@linkwarden/router/user";
 import { useConfig } from "@linkwarden/router/config";
 import {
+  LinkCheckerProblemLink,
   useLinkCheckerReport,
   useRecheckLinks,
 } from "@linkwarden/router/linkChecker";
@@ -43,6 +47,11 @@ const Page: NextPageWithLayout = () => {
   }, [account]);
 
   const instanceDisabled = config?.LINK_CHECKER_ENABLED === null;
+
+  const brokenLinks =
+    report?.problemLinks.filter((l) => l.checkStatus !== "RESTRICTED") ?? [];
+  const restrictedLinks =
+    report?.problemLinks.filter((l) => l.checkStatus === "RESTRICTED") ?? [];
 
   const hasChanges =
     !!account?.id &&
@@ -214,78 +223,23 @@ const Page: NextPageWithLayout = () => {
 
             <p className="text-lg mt-6 mb-2">{t("problem_links")}</p>
 
-            {report.problemLinks.length === 0 ? (
+            {brokenLinks.length === 0 ? (
               <p className="text-neutral">{t("no_problem_links")}</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="table" data-testid="problem-links">
-                  <thead>
-                    <tr>
-                      <th>{t("name")}</th>
-                      <th>{t("link_status")}</th>
-                      <th>{t("collection")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {report.problemLinks.map((link) => {
-                      const style = linkCheckStatusStyles[link.checkStatus];
+              <ProblemLinksTable links={brokenLinks} testId="problem-links" />
+            )}
 
-                      return (
-                        <tr key={link.id}>
-                          <td className="max-w-xs">
-                            <p className="truncate" title={link.name}>
-                              {link.name || link.url}
-                            </p>
-                            {link.url && (
-                              <a
-                                href={link.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-xs text-neutral truncate block hover:opacity-70"
-                                title={link.url}
-                              >
-                                {link.url}
-                              </a>
-                            )}
-                          </td>
-                          <td>
-                            <p
-                              className={clsx(
-                                "flex items-center gap-1 whitespace-nowrap",
-                                style.color
-                              )}
-                              title={t(`${style.label}_desc`)}
-                            >
-                              <i className={style.icon}></i>
-                              {t(style.label)}
-                            </p>
-                            <p className="text-xs text-neutral">
-                              {link.checkStatusCode
-                                ? `HTTP ${link.checkStatusCode}`
-                                : link.checkError}
-                            </p>
-                            {link.checkFailCount > 1 && (
-                              <p className="text-xs text-neutral">
-                                {t("failed_checks_in_a_row", {
-                                  count: link.checkFailCount,
-                                })}
-                              </p>
-                            )}
-                          </td>
-                          <td>
-                            <Link
-                              href={`/collections/${link.collection.id}`}
-                              className="hover:opacity-70"
-                            >
-                              {link.collection.name}
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+            {restrictedLinks.length > 0 && (
+              <>
+                <p className="text-lg mt-6">{t("unverified_links")}</p>
+                <p className="text-sm text-neutral mb-2">
+                  {t("unverified_links_desc")}
+                </p>
+                <ProblemLinksTable
+                  links={restrictedLinks}
+                  testId="unverified-links"
+                />
+              </>
             )}
           </div>
         )}
@@ -293,6 +247,86 @@ const Page: NextPageWithLayout = () => {
     </>
   );
 };
+
+function ProblemLinksTable({
+  links,
+  testId,
+}: {
+  links: LinkCheckerProblemLink[];
+  testId: string;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="table" data-testid={testId}>
+        <thead>
+          <tr>
+            <th>{t("name")}</th>
+            <th>{t("link_status")}</th>
+            <th>{t("collection")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {links.map((link) => {
+            const style = linkCheckStatusStyles[link.checkStatus];
+
+            return (
+              <tr key={link.id}>
+                <td className="max-w-xs">
+                  <p className="truncate" title={link.name}>
+                    {link.name || link.url}
+                  </p>
+                  {link.url && (
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-neutral truncate block hover:opacity-70"
+                      title={link.url}
+                    >
+                      {link.url}
+                    </a>
+                  )}
+                </td>
+                <td>
+                  <p
+                    className={clsx(
+                      "flex items-center gap-1 whitespace-nowrap",
+                      style.color
+                    )}
+                  >
+                    <i className={style.icon}></i>
+                    {t(style.label)}
+                  </p>
+                  <p className="text-xs text-neutral max-w-xs">
+                    {linkCheckDetail(t, link)}
+                  </p>
+                  {link.checkStatus !== "RESTRICTED" &&
+                    link.checkFailCount > 1 && (
+                      <p className="text-xs text-neutral">
+                        {t("failed_checks_in_a_row", {
+                          count: link.checkFailCount,
+                        })}
+                      </p>
+                    )}
+                </td>
+                <td>
+                  <Link
+                    href={`/collections/${link.collection.id}`}
+                    className="hover:opacity-70"
+                  >
+                    {link.collection.name}
+                  </Link>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 Page.getLayout = function getLayout(page: ReactElement<any>) {
   return <SettingsLayout>{page}</SettingsLayout>;
